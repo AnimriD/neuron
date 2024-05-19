@@ -1,24 +1,49 @@
 import streamlit as st
-from streamlit.logger import get_logger
-import numpy as np
-import time
+from neuron import h
+from neuron.units import ms, mV, µm
+import matplotlib.pyplot as plt
 
-progress_bar = st.sidebar.progress(0)
-status_text = st.sidebar.empty()
-last_rows = np.random.randn(1, 1)
-chart = st.line_chart(last_rows)
+# Function to run the NEURON simulation
+def run_simulation():
+    # Load standard run library
+    h.load_file("stdrun.hoc")
 
-for i in range(1, 101):
-    new_rows = last_rows[-1, :] + np.random.randn(5, 1).cumsum(axis=0)
-    status_text.text("%i%% Complete" % i)
-    chart.add_rows(new_rows)
-    progress_bar.progress(i)
-    last_rows = new_rows
-    time.sleep(0.05)
+    # Create soma section
+    soma = h.Section(name='soma')
+    soma.L = 20  # microns
+    soma.diam = 20  # microns
 
-progress_bar.empty()
+    # Simulation parameters
+    h.dt = 0.025  # time step (ms)
+    h.tstop = 100  # simulation stop time (ms)
 
-# Streamlit widgets automatically run the script from top to bottom. Since
-# this button is not connected to any other logic, it just causes a plain
-# rerun.
-st.button("Re-run")
+    # Record membrane potential at the center of the soma
+    v_soma = h.Vector().record(soma(0.5)._ref_v)
+    t = h.Vector().record(h._ref_t)
+
+    # Define a simple mechanism (e.g., Hodgkin-Huxley)
+    soma.insert('hh')
+
+    # Run the simulation
+    h.finitialize(-65 * mV)
+    h.run()
+
+    return t, v_soma
+
+# Function to plot the results
+def plot_results(t, v_soma):
+    plt.figure(figsize=(8, 4))
+    plt.plot(t, v_soma)
+    plt.xlabel('Time (ms)')
+    plt.ylabel('Membrane Potential (mV)')
+    plt.title('Membrane Potential vs. Time in Soma')
+    st.pyplot(plt)
+
+# Streamlit interface
+st.title('NEURON Simulation with Streamlit')
+
+if st.button('Run Simulation'):
+    st.write('Running simulation...')
+    t, v_soma = run_simulation()
+    st.write('Simulation completed.')
+    plot_results(t, v_soma)
