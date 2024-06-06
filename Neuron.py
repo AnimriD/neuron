@@ -6,6 +6,16 @@ import matplotlib.pyplot as plt
 # Streamlit interface
 st.title('NEURON Simulation with Streamlit')
 
+# Slider for selecting the initial voltage
+voltage = st.slider("Choose the voltage with which to run the simulation", min_value=-80, max_value= -55, value=-65)
+
+# Run the simulation when the button is pressed
+if st.button('Run Simulation'):
+    st.write('Running simulation...')
+    t, v_soma = run_simulation(voltage)
+    st.write('Simulation completed.')
+    plot_results(t, v_soma)
+
 # Function to run the NEURON simulation
 def run_simulation(voltage):
     # Load standard run library
@@ -42,12 +52,3 @@ def plot_results(t, v_soma):
     plt.title('Membrane Potential vs. Time in Soma')
     st.pyplot(plt)
 
-# Slider for selecting the initial voltage
-voltage = st.slider("Choose the voltage with which to run the simulation", min_value=-80, max_value=-55, value=-65)
-
-# Run the simulation when the button is pressed
-if st.button('Run Simulation'):
-    st.write('Running simulation...')
-    t, v_soma = run_simulation(voltage)
-    st.write('Simulation completed.')
-    plot_results(t, v_soma)
