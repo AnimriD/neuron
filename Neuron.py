@@ -3,8 +3,19 @@ from neuron import h
 from neuron.units import ms, mV, µm
 import matplotlib.pyplot as plt
 
+# Streamlit interface
+st.title('NEURON Simulation with Streamlit')
+
+if st.button('Run Simulation'):
+    st.write('Running simulation...')
+    t, v_soma = run_simulation()
+    st.write('Simulation completed.')
+    plot_results(t, v_soma)
+
+voltage = st.slider("Choose the voltage with which to run the simulation", min_value = -55, max_value = -80, value= -65)
+
 # Function to run the NEURON simulation
-def run_simulation():
+def run_simulation(voltage):
     # Load standard run library
     h.load_file("stdrun.hoc")
 
@@ -25,7 +36,7 @@ def run_simulation():
     soma.insert('hh')
 
     # Run the simulation
-    h.finitialize(-65 * mV)
+    h.finitialize(voltage * mV)
     h.run()
 
     return t, v_soma
@@ -39,11 +50,3 @@ def plot_results(t, v_soma):
     plt.title('Membrane Potential vs. Time in Soma')
     st.pyplot(plt)
 
-# Streamlit interface
-st.title('NEURON Simulation with Streamlit')
-
-if st.button('Run Simulation'):
-    st.write('Running simulation...')
-    t, v_soma = run_simulation()
-    st.write('Simulation completed.')
-    plot_results(t, v_soma)
