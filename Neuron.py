@@ -3,7 +3,7 @@ from neuron import h
 import numpy as np
 import matplotlib.pyplot as plt
 
-st.title('NEURON Simulation with Streamlit')
+
 
 # Initialize NEURON
 soma = h.Section(name='soma')
