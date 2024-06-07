@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 # Streamlit interface
 st.title('NEURON Simulation with Streamlit')
 voltage = st.slider("Choose the voltage with which to run the simulation", min_value=-80, max_value=-55, value=-65)
+print(voltage)
 
 
 # Function to run the NEURON simulation
