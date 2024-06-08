@@ -1,6 +1,6 @@
 import streamlit as st
 from neuron import h, gui
-from neuron.units import ms, mV
+from neuron.units import mV, ms
 
 # Initialize the NEURON environment
 h.load_file("stdrun.hoc")
@@ -13,16 +13,15 @@ soma.diam = 20  # diameter in microns
 # Insert passive properties (hh mechanism)
 soma.insert('hh')
 
-# Set up the current clamp stimulus
-stim = h.IClamp(soma(0.5))
-stim.delay = 5  # ms
-stim.dur = 1  # ms
-stim.amp = 0.1  # nA, initial amplitude
+# Set up the voltage clamp stimulus
+vclamp = h.VClamp(soma(0.5))
+vclamp.dur[0] = 25  # duration of the first clamp level in ms
+vclamp.amp[0] = -65  # initial clamp level in mV
 
 # Function to run the simulation
-def run_simulation(stim_amp):
-    # Update the stimulus amplitude
-    stim.amp = stim_amp
+def run_simulation(clamp_voltage):
+    # Update the clamp voltage
+    vclamp.amp[0] = clamp_voltage
 
     # Record the membrane potential
     v_soma = h.Vector().record(soma(0.5)._ref_v)
@@ -37,11 +36,11 @@ def run_simulation(stim_amp):
 # Streamlit UI components
 st.title('NEURON Simulation with Streamlit')
 
-voltage = st.slider('Stimulus Amplitude (nA)', max=-55, min=-88)
-st.write(f'Stimulus amplitude set to: {stim_amp} nA')
+clamp_voltage = st.slider('Clamp Voltage (mV)', -100.0, 100.0, -65.0, 1.0)
+st.write(f'Clamp voltage set to: {clamp_voltage} mV')
 
-# Run the simulation with the selected stimulus amplitude
-t, v_soma = run_simulation(voltage)
+# Run the simulation with the selected clamp voltage
+t, v_soma = run_simulation(clamp_voltage)
 
 # Plot the results
 import matplotlib.pyplot as plt
