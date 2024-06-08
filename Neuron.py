@@ -49,7 +49,6 @@ def plot_results(t, v_soma):
 
 # Run the simulation when the button is pressed
 if st.button('Run Simulation'):
-    st.write('Running simulation...')
     t, v_soma = run_simulation(voltage)
     st.write('Simulation completed.')
     plot_results(t, v_soma)
