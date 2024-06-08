@@ -36,7 +36,7 @@ def run_simulation(clamp_voltage):
 # Streamlit UI components
 st.title('NEURON Simulation with Streamlit')
 
-clamp_voltage = st.slider('Clamp Voltage (mV)', -100.0, 100.0, -65.0, 1.0)
+clamp_voltage = st.slider('Clamp Voltage (mV)', -80, -55 ,-65)
 st.write(f'Clamp voltage set to: {clamp_voltage} mV')
 
 # Run the simulation with the selected clamp voltage
