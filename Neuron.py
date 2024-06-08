@@ -37,11 +37,11 @@ def run_simulation(stim_amp):
 # Streamlit UI components
 st.title('NEURON Simulation with Streamlit')
 
-stim_amp = st.slider('Stimulus Amplitude (nA)', 0.0, 1.0, 0.1, 0.01)
+voltage = st.slider('Stimulus Amplitude (nA)', max=-55, min=-88)
 st.write(f'Stimulus amplitude set to: {stim_amp} nA')
 
 # Run the simulation with the selected stimulus amplitude
-t, v_soma = run_simulation(stim_amp)
+t, v_soma = run_simulation(voltage)
 
 # Plot the results
 import matplotlib.pyplot as plt
