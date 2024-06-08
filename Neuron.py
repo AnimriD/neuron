@@ -46,7 +46,6 @@ def plot_results(t, v_soma):
     st.pyplot(plt)
 
 # Slider for selecting the initial voltage
-voltage = st.slider("Choose the voltage with which to run the simulation", min_value=-80, max_value=-55, value=-65, key='voltage_slider')
 
 # Run the simulation when the button is pressed
 if st.button('Run Simulation'):
