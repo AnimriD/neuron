@@ -15,7 +15,7 @@ soma.insert('hh')
 
 # Set up the voltage clamp stimulus
 vclamp = h.VClamp(soma(0.5))
-vclamp.dur[0] = 25  # duration of the first clamp level in ms
+vclamp.dur[0] = 5  # duration of the first clamp level in ms
 vclamp.amp[0] = -65  # initial clamp level in mV
 
 # Function to run the simulation
