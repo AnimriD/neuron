@@ -1,54 +1,56 @@
 import streamlit as st
-from neuron import h
-from neuron.units import ms, mV, µm
-import matplotlib.pyplot as plt
+from neuron import h, gui
+from neuron.units import ms, mV
 
-# Streamlit interface
-st.title('NEURON Simulation with Streamlit')
+# Initialize the NEURON environment
+h.load_file("stdrun.hoc")
 
-voltage = st.slider("Choose the voltage with which to run the simulation", min_value=-80, max_value=-55, value=-65, key='voltage_slider')
+# Create the soma section
+soma = h.Section(name='soma')
+soma.L = 20  # length in microns
+soma.diam = 20  # diameter in microns
 
+# Insert passive properties (hh mechanism)
+soma.insert('hh')
 
-# Function to run the NEURON simulation
-def run_simulation(voltage):
-    # Load standard run library
-    h.load_file("stdrun.hoc")
+# Set up the current clamp stimulus
+stim = h.IClamp(soma(0.5))
+stim.delay = 5  # ms
+stim.dur = 1  # ms
+stim.amp = 0.1  # nA, initial amplitude
 
-    # Create soma section
-    soma = h.Section(name='soma')
-    soma.L = 20  # microns
-    soma.diam = 20  # microns
+# Function to run the simulation
+def run_simulation(stim_amp):
+    # Update the stimulus amplitude
+    stim.amp = stim_amp
 
-    # Simulation parameters
-    h.dt = 0.025  # time step (ms)
-    h.tstop = 100  # simulation stop time (ms)
-
-    # Record membrane potential at the center of the soma
+    # Record the membrane potential
     v_soma = h.Vector().record(soma(0.5)._ref_v)
     t = h.Vector().record(h._ref_t)
 
-    # Define a simple mechanism (e.g., Hodgkin-Huxley)
-    soma.insert('hh')
-
     # Run the simulation
-    h.finitialize(voltage * mV)
-    h.run()
+    h.finitialize(-65 * mV)
+    h.continuerun(25 * ms)
 
     return t, v_soma
 
-# Function to plot the results
-def plot_results(t, v_soma):
-    plt.figure(figsize=(8, 4))
-    plt.plot(t, v_soma)
-    plt.xlabel('Time (ms)')
-    plt.ylabel('Membrane Potential (mV)')
-    plt.title('Membrane Potential vs. Time in Soma')
-    st.pyplot(plt)
+# Streamlit UI components
+st.title('NEURON Simulation with Streamlit')
 
-# Slider for selecting the initial voltage
+stim_amp = st.slider('Stimulus Amplitude (nA)', 0.0, 1.0, 0.1, 0.01)
+st.write(f'Stimulus amplitude set to: {stim_amp} nA')
 
-# Run the simulation when the button is pressed
-if st.button('Run Simulation'):
-    t, v_soma = run_simulation(voltage)
-    st.write('Simulation completed.')
-    plot_results(t, v_soma)
+# Run the simulation with the selected stimulus amplitude
+t, v_soma = run_simulation(stim_amp)
+
+# Plot the results
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots()
+ax.plot(t, v_soma, label='Membrane Potential (mV)')
+ax.set_xlabel('Time (ms)')
+ax.set_ylabel('Voltage (mV)')
+ax.set_title('Membrane Potential vs. Time')
+ax.legend()
+
+st.pyplot(fig)
