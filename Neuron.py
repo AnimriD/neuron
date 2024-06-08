@@ -29,7 +29,7 @@ def run_simulation(clamp_voltage):
 
     # Run the simulation
     h.finitialize(-65 * mV)
-    h.continuerun(25 * ms)
+    h.continuerun(5 * ms)
 
     return t, v_soma
 
