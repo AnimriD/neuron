@@ -1,55 +1,41 @@
 import streamlit as st
 from neuron import h, gui
-from neuron.units import mV, ms
+import matplotlib.pyplot as plt
+import numpy as np
 
-# Initialize the NEURON environment
-h.load_file("stdrun.hoc")
+st.title("NEURON Simulation with Streamlit")
 
-# Create the soma section
+# Define a basic neuron model
+st.sidebar.header("Neuron Parameters")
+soma_diameter = st.sidebar.slider("Soma Diameter (µm)", min_value=10, max_value=50, value=20)
+soma_length = st.sidebar.slider("Soma Length (µm)", min_value=10, max_value=50, value=20)
+stim_current = st.sidebar.slider("Stimulus Current (nA)", min_value=0.1, max_value=10.0, value=0.5)
+
+# Create the soma
 soma = h.Section(name='soma')
-soma.L = 20  # length in microns
-soma.diam = 20  # diameter in microns
+soma.L = soma_length
+soma.diam = soma_diameter
+soma.insert('hh')  # Insert Hodgkin-Huxley channels
 
-# Insert passive properties (hh mechanism)
-soma.insert('hh')
+# Create a stimulus
+stim = h.IClamp(soma(0.5))
+stim.delay = 5  # ms
+stim.dur = 1  # ms
+stim.amp = stim_current  # nA
 
-# Set up the voltage clamp stimulus
-vclamp = h.VClamp(soma(0.5))
-vclamp.dur[0] = 5  # duration of the first clamp level in ms
-vclamp.amp[0] = -65  # initial clamp level in mV
+# Record time and voltage
+t = h.Vector().record(h._ref_t)
+v = h.Vector().record(soma(0.5)._ref_v)
 
-# Function to run the simulation
-def run_simulation(clamp_voltage):
-    # Update the clamp voltage
-    vclamp.amp[0] = clamp_voltage
-
-    # Record the membrane potential
-    v_soma = h.Vector().record(soma(0.5)._ref_v)
-    t = h.Vector().record(h._ref_t)
-
-    # Run the simulation
-    h.finitialize(-65 * mV)
-    h.continuerun(5 * ms)
-
-    return t, v_soma
-
-# Streamlit UI components
-st.title('NEURON Simulation with Streamlit')
-
-clamp_voltage = st.slider('Clamp Voltage (mV)',min= -80, max=-55 , value= -65)
-st.write(f'Clamp voltage set to: {clamp_voltage} mV')
-
-# Run the simulation with the selected clamp voltage
-t, v_soma = run_simulation(clamp_voltage)
+# Run the simulation
+h.tstop = 40.0  # ms
+h.run()
 
 # Plot the results
-import matplotlib.pyplot as plt
-
 fig, ax = plt.subplots()
-ax.plot(t, v_soma, label='Membrane Potential (mV)')
+ax.plot(t, v)
 ax.set_xlabel('Time (ms)')
 ax.set_ylabel('Voltage (mV)')
-ax.set_title('Membrane Potential vs. Time')
-ax.legend()
+ax.set_title('Membrane Potential')
 
 st.pyplot(fig)
